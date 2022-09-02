@@ -11,6 +11,8 @@ type BridgeMessage = {
         }
       | { subtitle: { newSubtitle: string } };
   };
+
+  fetchFeed: { url: string };
 };
 
 type BridgeEvent = {

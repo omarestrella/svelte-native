@@ -14,16 +14,22 @@ enum JavaScriptBridgeEvent {
   case removeShortcut
   
   case updateApplicationState
+  
+  case fetchFeed
 }
 
 // Native -> Client
 enum JavaScriptBridgeMessage: Encodable {
   case callShortcut(id: String)
   
+  case fetchedFeed(feed: ClientFeed)
+  
   var messageData: (String, Encodable) {
     switch self {
     case .callShortcut(let id):
       return ("callShortcut", ["id": id])
+    case .fetchedFeed(let feed):
+      return ("fetchedFeed", feed)
     }
   }
 }
@@ -45,7 +51,8 @@ class JavaScriptBridge: NSObject, WKScriptMessageHandler {
   var callbacks: [JavaScriptBridgeEvent: [EventHandler]] = [
     .registerShortcut: [],
     .removeShortcut: [],
-    .updateApplicationState: []
+    .updateApplicationState: [],
+    .fetchFeed: []
   ]
 
   func initialize(_ webView: WKWebView) {
@@ -68,6 +75,8 @@ class JavaScriptBridge: NSObject, WKScriptMessageHandler {
         break
       case .updateApplicationState(_):
         emit(.updateApplicationState, message: message)
+      case .fetchFeed(_):
+        emit(.fetchFeed, message: message)
       case .error(let error):
         print("Got an error while decoding client message", error)
         break

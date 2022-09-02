@@ -8,6 +8,7 @@
   import { shortcutManager, type Shortcut } from "./lib/managers/shortcuts";
 
   let showMessage = false;
+  let feed = "";
 
   let shortcut: Shortcut = {
     id: uuid(),
@@ -23,12 +24,12 @@
   };
 
   onMount(() => {
-    javascriptBridge.send("updateApplicationState", {
-      update: {
-        title: {
-          newTitle: "Title",
-        },
-      },
+    javascriptBridge.send("fetchFeed", {
+      url: "https://feeds.arstechnica.com/arstechnica/index",
+    });
+
+    javascriptBridge.on("fetchedFeed", (data) => {
+      feed = JSON.stringify(data, null, 2);
     });
 
     shortcutManager.registerShortcut(shortcut);
@@ -72,6 +73,10 @@
 
   {#if showMessage}
     <p>gotta add new feed support?</p>
+  {/if}
+
+  {#if feed}
+    <p>{feed}</p>
   {/if}
 </main>
 

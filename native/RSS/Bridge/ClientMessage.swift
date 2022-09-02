@@ -12,6 +12,8 @@ enum ClientMessage {
   case removeShortcut(id: String)
   
   case updateApplicationState(ApplicationUpdate)
+  
+  case fetchFeed(url: String)
 
   case error(message: String)
 }
@@ -33,6 +35,8 @@ extension ClientMessage: Decodable {
         self = .removeShortcut(id: try Dictionary<String, String>(from: decoder)["id"]!)
       case "updateApplicationState":
         self = .updateApplicationState(try ApplicationUpdate(from: decoder))
+      case "fetchFeed":
+        self = .fetchFeed(url: try Dictionary<String, String>(from: decoder)["url"]!)
       default:
         self = .error(message: "Encountered unknown type")
       }

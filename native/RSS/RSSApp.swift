@@ -41,11 +41,13 @@ struct AppCommands: Commands {
 
 @main
 struct RSSApp: App {
+  var feedManager = FeedManager()
   var shortcutManager = ShortcutManager()
   
   var body: some Scene {
     WindowGroup {
       ContentView()
+        .environmentObject(feedManager)
         .environmentObject(shortcutManager)
     }
     .defaultSize(width: 1024, height: 1024)
