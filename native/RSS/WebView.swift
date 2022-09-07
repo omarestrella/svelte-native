@@ -10,8 +10,6 @@ import SwiftUI
 import WebKit
 
 struct WebView {
-  @EnvironmentObject var shortcutManager: ShortcutManager
-
   var url: String
   private let webView = WKWebView()
 
@@ -25,18 +23,6 @@ struct WebView {
 
   class Coordinator: NSObject, WKNavigationDelegate {
     private var webView: WKWebView
-
-    var shortcutManager: ShortcutManager? {
-      didSet {
-        shortcutManager?.addShortcut(
-          .init(type: .native,
-                placement: .file,
-                label: "Reload",
-                key: "R",
-                modifiers: [.command],
-                handler: reload))
-      }
-    }
 
     init(_ webView: WKWebView) {
       self.webView = webView
@@ -61,7 +47,6 @@ struct WebView {
     public func webView(_: WKWebView, didFinish _: WKNavigation!) {}
 
     public func webView(_: WKWebView, didStartProvisionalNavigation _: WKNavigation!) {
-      shortcutManager?.clearClientShortcuts()
     }
 
     public func webView(_: WKWebView, decidePolicyFor _: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
@@ -77,8 +62,6 @@ extension WebView: NSViewRepresentable {
   func updateNSView(_: WKWebView, context _: NSViewRepresentableContext<WebView>) {}
 
   func makeNSView(context: NSViewRepresentableContext<WebView>) -> WKWebView {
-    context.coordinator.shortcutManager = shortcutManager
-
     webView.navigationDelegate = context.coordinator
     webView.uiDelegate = context.coordinator as? WKUIDelegate
     if let url = URL(string: url) {

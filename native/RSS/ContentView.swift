@@ -8,8 +8,6 @@
 import SwiftUI
 
 struct ContentView: View {
-  @EnvironmentObject var shortcutManager: ShortcutManager
-  
   @ObservedObject var appModel = ApplicationModel()
 
   var body: some View {
@@ -24,14 +22,6 @@ struct ContentView: View {
             Label("toolbar", systemImage: "plus")
           })
         }
-      }
-      .onAppear {
-        JavaScriptBridge.instance.on(.registerShortcut, .init(handler: { message in
-          guard case let .registerShortcut(shortcut) = message else {
-            return
-          }
-          shortcutManager.addShortcut(shortcut.toShortcut())
-        }))
       }
   }
 }

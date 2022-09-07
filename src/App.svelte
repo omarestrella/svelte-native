@@ -5,23 +5,8 @@
   import "./app.css";
   import { javascriptBridge } from "./lib/managers/bridge";
 
-  import { shortcutManager, type Shortcut } from "./lib/managers/shortcuts";
-
   let showMessage = false;
   let feed = "";
-
-  let shortcut: Shortcut = {
-    id: uuid(),
-    label: "Add New Feed",
-    placement: "file",
-    keyboardShortcut: {
-      key: "N",
-      modifiers: ["command", "shift"],
-    },
-    handler: () => {
-      showMessage = true;
-    },
-  };
 
   onMount(() => {
     javascriptBridge.send("fetchFeed", {
@@ -30,12 +15,8 @@
 
     javascriptBridge.on("fetchedFeed", (data) => {
       feed = JSON.stringify(data, null, 2);
+      javascriptBridge.log("client", feed);
     });
-
-    shortcutManager.registerShortcut(shortcut);
-  });
-  onDestroy(() => {
-    shortcutManager.removeShortcut(shortcut.id);
   });
 </script>
 

@@ -7,14 +7,35 @@
 
 import Foundation
 
-enum ClientMessage {
-  case registerShortcut(ClientShortcut)
-  case removeShortcut(id: String)
-  
-  case updateApplicationState(ApplicationUpdate)
-  
-  case fetchFeed(url: String)
+protocol ClientRequest: Decodable {}
 
+struct ApplicationUpdateRequest: ClientRequest {
+  enum UpdateType: Decodable {
+    case title(newTitle: String)
+    case subtitle(newSubtitle: String)
+  }
+  
+  var update: UpdateType
+}
+
+struct FeedRequest: ClientRequest {
+  var url: String
+}
+
+struct ClientLog: ClientRequest {
+  var name: String
+  var message: String?
+}
+
+enum ClientMessage {
+  // MARK: Native
+  case updateApplicationState(ApplicationUpdateRequest)
+  
+  // MARK: RSS
+  case fetchFeed(FeedRequest)
+
+  // MARK: Helpers
+  case log(ClientLog)
   case error(message: String)
 }
 
@@ -29,16 +50,14 @@ extension ClientMessage: Decodable {
 
     do {
       switch type {
-      case "registerShortcut":
-        self = .registerShortcut(try ClientShortcut(from: decoder))
-      case "removeShortcut":
-        self = .removeShortcut(id: try Dictionary<String, String>(from: decoder)["id"]!)
       case "updateApplicationState":
-        self = .updateApplicationState(try ApplicationUpdate(from: decoder))
+        self = .updateApplicationState(try ApplicationUpdateRequest(from: decoder))
       case "fetchFeed":
-        self = .fetchFeed(url: try Dictionary<String, String>(from: decoder)["url"]!)
+        self = .fetchFeed(try FeedRequest(from: decoder))
+      case "log":
+        self = .log(try ClientLog(from: decoder))
       default:
-        self = .error(message: "Encountered unknown type")
+        self = .error(message: "Encountered unknown type: \(type)")
       }
     } catch {
       self = .error(message: error.localizedDescription)

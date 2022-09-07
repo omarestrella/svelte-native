@@ -1,9 +1,4 @@
-import type { Shortcut } from "./shortcuts";
-
 type BridgeMessage = {
-  registerShortcut: Shortcut;
-  removeShortcut: { id: string };
-
   updateApplicationState: {
     update:
       | {
@@ -16,10 +11,7 @@ type BridgeMessage = {
 };
 
 type BridgeEvent = {
-  callShortcut: {
-    id: string;
-  };
-  loadFeed: {
+  fetchedFeed: {
     id: string;
     url: string;
   };
@@ -60,6 +52,20 @@ class JavaScriptBridge {
       window.webkit.messageHandlers.mobile.postMessage({
         type: message,
         ...data,
+      });
+    }
+  }
+
+  log(name: string, message?: string) {
+    if (
+      window.webkit &&
+      window.webkit.messageHandlers &&
+      window.webkit.messageHandlers.mobile
+    ) {
+      window.webkit.messageHandlers.mobile.postMessage({
+        type: "log",
+        name,
+        message,
       });
     }
   }

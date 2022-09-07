@@ -7,53 +7,61 @@
 
 import Foundation
 import WebKit
+import Combine
 
 // Client -> Native
 enum JavaScriptBridgeEvent {
-  case registerShortcut
-  case removeShortcut
-  
   case updateApplicationState
-  
   case fetchFeed
 }
 
 // Native -> Client
 enum JavaScriptBridgeMessage: Encodable {
-  case callShortcut(id: String)
-  
   case fetchedFeed(feed: ClientFeed)
   
   var messageData: (String, Encodable) {
     switch self {
-    case .callShortcut(let id):
-      return ("callShortcut", ["id": id])
     case .fetchedFeed(let feed):
       return ("fetchedFeed", feed)
     }
   }
 }
 
-struct EventHandler: Identifiable, Equatable {
-  var id = UUID()
-  var handler: (_: ClientMessage) -> Void
+typealias EventCallback<T> = (_ data: T) -> Void
+
+class ClientEventHandlers {
+  var feedRequestHandlers: [EventCallback<FeedRequest>] = []
+  var applicationUpdateRequestHandlers: [EventCallback<ApplicationUpdateRequest>] = []
   
-  static func == (lhs: EventHandler, rhs: EventHandler) -> Bool {
-    lhs.id == rhs.id
+  func on(feedRequest handler: @escaping EventCallback<FeedRequest>) {
+    feedRequestHandlers.append(handler)
+  }
+  
+  func on(applicationUpdateRequest handler: @escaping EventCallback<ApplicationUpdateRequest>) {
+    applicationUpdateRequestHandlers.append(handler)
+  }
+  
+  func emit<T>(_ event: JavaScriptBridgeEvent, data: T) {
+    switch event {
+    case .fetchFeed:
+      guard let data = data as? FeedRequest else { return }
+      feedRequestHandlers.forEach { $0(data) }
+      break
+    case .updateApplicationState:
+      guard let data = data as? ApplicationUpdateRequest else { return }
+      applicationUpdateRequestHandlers.forEach { $0(data) }
+      break
+    }
   }
 }
+
 
 class JavaScriptBridge: NSObject, WKScriptMessageHandler {
   static var instance = JavaScriptBridge()
 
   var webView: WKWebView?
   
-  var callbacks: [JavaScriptBridgeEvent: [EventHandler]] = [
-    .registerShortcut: [],
-    .removeShortcut: [],
-    .updateApplicationState: [],
-    .fetchFeed: []
-  ]
+  private var eventHandlers = ClientEventHandlers()
 
   func initialize(_ webView: WKWebView) {
     self.webView = webView
@@ -64,19 +72,16 @@ class JavaScriptBridge: NSObject, WKScriptMessageHandler {
     do {
       let json = try JSONSerialization.data(withJSONObject: message.body, options: [])
       let decoder = JSONDecoder()
-      let message = try decoder.decode(ClientMessage.self, from: json)
+      let clientMessage = try decoder.decode(ClientMessage.self, from: json)
       
-      switch message {
-      case .registerShortcut(_):
-        emit(.registerShortcut, message: message)
+      switch clientMessage {
+      case .updateApplicationState(let update):
+        eventHandlers.emit(.updateApplicationState, data: update)
+      case .fetchFeed(let feedRequest):
+        eventHandlers.emit(.fetchFeed, data: feedRequest)
+      case .log(let log):
+        print(log.name, log.message ?? "")
         break
-      case .removeShortcut(_):
-        emit(.removeShortcut, message: message)
-        break
-      case .updateApplicationState(_):
-        emit(.updateApplicationState, message: message)
-      case .fetchFeed(_):
-        emit(.fetchFeed, message: message)
       case .error(let error):
         print("Got an error while decoding client message", error)
         break
@@ -86,21 +91,12 @@ class JavaScriptBridge: NSObject, WKScriptMessageHandler {
     }
   }
 
-  func on(_ event: JavaScriptBridgeEvent, _ handler: EventHandler) {
-    callbacks[event]?.append(handler)
+  func on(feedRequest handler: @escaping EventCallback<FeedRequest>) {
+    eventHandlers.on(feedRequest: handler)
   }
   
-  func off(_ event: JavaScriptBridgeEvent, _ handler: EventHandler) {
-    let idx = callbacks[event]?.firstIndex(where: { $0 == handler })
-    if let idx {
-      callbacks[event]?.remove(at: idx)
-    }
-  }
-  
-  func emit(_ event: JavaScriptBridgeEvent, message: ClientMessage) {
-    callbacks[event]?.forEach { handler in
-      handler.handler(message)
-    }
+  func on(applicationUpdateRequest handler: @escaping EventCallback<ApplicationUpdateRequest>) {
+    eventHandlers.on(applicationUpdateRequest: handler)
   }
   
   func send(_ message: JavaScriptBridgeMessage) {

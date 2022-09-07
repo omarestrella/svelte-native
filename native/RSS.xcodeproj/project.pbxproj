@@ -15,11 +15,8 @@
 		6646FDEB28BEDC140026F7F2 /* RSSUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6646FDEA28BEDC140026F7F2 /* RSSUITests.swift */; };
 		6646FDED28BEDC140026F7F2 /* RSSUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6646FDEC28BEDC140026F7F2 /* RSSUITestsLaunchTests.swift */; };
 		6646FDFB28BEDC8D0026F7F2 /* WebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6646FDFA28BEDC8D0026F7F2 /* WebView.swift */; };
-		6646FDFF28BEEB580026F7F2 /* ShortcutManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6646FDFE28BEEB580026F7F2 /* ShortcutManager.swift */; };
 		6646FE0128C0334C0026F7F2 /* JavaScriptBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6646FE0028C0334C0026F7F2 /* JavaScriptBridge.swift */; };
 		6646FE0328C036B60026F7F2 /* ClientMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6646FE0228C036B60026F7F2 /* ClientMessage.swift */; };
-		6646FE0528C043390026F7F2 /* ClientShortcut.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6646FE0428C043390026F7F2 /* ClientShortcut.swift */; };
-		66DE2BC628C196BE00AF0E20 /* ApplicationState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66DE2BC528C196BE00AF0E20 /* ApplicationState.swift */; };
 		66DE2BC928C197F800AF0E20 /* ApplicationModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66DE2BC828C197F800AF0E20 /* ApplicationModel.swift */; };
 		66DE2BCB28C1A58500AF0E20 /* FeedManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66DE2BCA28C1A58500AF0E20 /* FeedManager.swift */; };
 		66DE2BCE28C1A5C100AF0E20 /* FeedKit in Frameworks */ = {isa = PBXBuildFile; productRef = 66DE2BCD28C1A5C100AF0E20 /* FeedKit */; };
@@ -56,11 +53,8 @@
 		6646FDEC28BEDC140026F7F2 /* RSSUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RSSUITestsLaunchTests.swift; sourceTree = "<group>"; };
 		6646FDFA28BEDC8D0026F7F2 /* WebView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebView.swift; sourceTree = "<group>"; };
 		6646FDFC28BEE2EC0026F7F2 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
-		6646FDFE28BEEB580026F7F2 /* ShortcutManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShortcutManager.swift; sourceTree = "<group>"; };
 		6646FE0028C0334C0026F7F2 /* JavaScriptBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JavaScriptBridge.swift; sourceTree = "<group>"; };
 		6646FE0228C036B60026F7F2 /* ClientMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClientMessage.swift; sourceTree = "<group>"; };
-		6646FE0428C043390026F7F2 /* ClientShortcut.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClientShortcut.swift; sourceTree = "<group>"; };
-		66DE2BC528C196BE00AF0E20 /* ApplicationState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplicationState.swift; sourceTree = "<group>"; };
 		66DE2BC828C197F800AF0E20 /* ApplicationModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplicationModel.swift; sourceTree = "<group>"; };
 		66DE2BCA28C1A58500AF0E20 /* FeedManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -158,8 +152,6 @@
 			children = (
 				6646FE0028C0334C0026F7F2 /* JavaScriptBridge.swift */,
 				6646FE0228C036B60026F7F2 /* ClientMessage.swift */,
-				6646FE0428C043390026F7F2 /* ClientShortcut.swift */,
-				66DE2BC528C196BE00AF0E20 /* ApplicationState.swift */,
 			);
 			path = Bridge;
 			sourceTree = "<group>";
@@ -167,7 +159,6 @@
 		6646FDFD28BEEB4B0026F7F2 /* Managers */ = {
 			isa = PBXGroup;
 			children = (
-				6646FDFE28BEEB580026F7F2 /* ShortcutManager.swift */,
 				66DE2BCA28C1A58500AF0E20 /* FeedManager.swift */,
 			);
 			path = Managers;
@@ -320,12 +311,9 @@
 				66DE2BCB28C1A58500AF0E20 /* FeedManager.swift in Sources */,
 				66DE2BC928C197F800AF0E20 /* ApplicationModel.swift in Sources */,
 				6646FDFB28BEDC8D0026F7F2 /* WebView.swift in Sources */,
-				6646FE0528C043390026F7F2 /* ClientShortcut.swift in Sources */,
 				6646FDD128BEDC130026F7F2 /* ContentView.swift in Sources */,
 				6646FDCF28BEDC130026F7F2 /* RSSApp.swift in Sources */,
 				6646FE0328C036B60026F7F2 /* ClientMessage.swift in Sources */,
-				6646FDFF28BEEB580026F7F2 /* ShortcutManager.swift in Sources */,
-				66DE2BC628C196BE00AF0E20 /* ApplicationState.swift in Sources */,
 				6646FE0128C0334C0026F7F2 /* JavaScriptBridge.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
