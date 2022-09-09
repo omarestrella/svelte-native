@@ -18,11 +18,14 @@ enum JavaScriptBridgeEvent {
 // Native -> Client
 enum JavaScriptBridgeMessage: Encodable {
   case fetchedFeed(feed: ClientFeed)
+  case addFeed
   
   var messageData: (String, Encodable) {
     switch self {
     case .fetchedFeed(let feed):
       return ("fetchedFeed", feed)
+    case .addFeed:
+      return ("addFeed", "")
     }
   }
 }
@@ -80,7 +83,7 @@ class JavaScriptBridge: NSObject, WKScriptMessageHandler {
       case .fetchFeed(let feedRequest):
         eventHandlers.emit(.fetchFeed, data: feedRequest)
       case .log(let log):
-        print(log.name, log.message ?? "")
+        print("[Client Log] -", log.name, "\n", log.message ?? "")
         break
       case .error(let error):
         print("Got an error while decoding client message", error)

@@ -17,9 +17,9 @@ struct ContentView: View {
       .toolbar {
         ToolbarItem(placement: .navigation) {
           Button(action: {
-            print("toolbar")
+            JavaScriptBridge.instance.send(.addFeed)
           }, label: {
-            Label("toolbar", systemImage: "plus")
+            Label("add feed", systemImage: "plus")
           })
         }
       }

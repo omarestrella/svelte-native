@@ -11,10 +11,17 @@ import FeedKit
 struct ClientFeedItem: Encodable {
   var title: String
   var description: String
+  var date: String
+  var content: String
+  var link: String
 
   static func from(item: RSSFeedItem) -> ClientFeedItem? {
-    if let title = item.title, let description = item.description {
-      return .init(title: title, description: description)
+    if let title = item.title,
+       let description = item.description,
+       let date = item.pubDate,
+       let content = item.content?.contentEncoded,
+       let link = item.link {
+      return .init(title: title, description: description, date: date.formatted(.iso8601), content: content, link: link)
     }
     return nil
   }

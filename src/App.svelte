@@ -3,10 +3,14 @@
   import { v4 as uuid } from "uuid";
 
   import "./app.css";
+  import AddFeedModal from "./lib/components/AddFeedModal.svelte";
+  import FeedItems from "./lib/components/FeedItems.svelte";
+  import type { Feed } from "./lib/feeds";
   import { javascriptBridge } from "./lib/managers/bridge";
 
-  let showMessage = false;
-  let feed = "";
+  let showAddFeed = false;
+
+  let feed: Feed;
 
   onMount(() => {
     javascriptBridge.send("fetchFeed", {
@@ -14,56 +18,25 @@
     });
 
     javascriptBridge.on("fetchedFeed", (data) => {
-      feed = JSON.stringify(data, null, 2);
-      javascriptBridge.log("client", feed);
+      feed = data;
+
+      javascriptBridge.send("updateApplicationState", {
+        update: {
+          title: {
+            newTitle: data.title,
+          },
+        },
+      });
+    });
+
+    javascriptBridge.on("addFeed", () => {
+      showAddFeed = true;
     });
   });
 </script>
 
-<main>
-  <h1 class="text-4xl">Vite + Svelte</h1>
+<main class="h-screen overflow-hidden">
+  <FeedItems {feed} />
 
-  <div>
-    Title: <input
-      class="input input-primary"
-      on:input={({ currentTarget: { value } }) => {
-        javascriptBridge.send("updateApplicationState", {
-          update: {
-            title: {
-              newTitle: value,
-            },
-          },
-        });
-      }}
-    />
-    <br />
-    Subtitle:
-    <input
-      class="input input-primary"
-      on:input={({ currentTarget: { value } }) => {
-        javascriptBridge.send("updateApplicationState", {
-          update: {
-            subtitle: {
-              newSubtitle: value,
-            },
-          },
-        });
-      }}
-    />
-  </div>
-
-  {#if showMessage}
-    <p>gotta add new feed support?</p>
-  {/if}
-
-  {#if feed}
-    <p>{feed}</p>
-  {/if}
+  <AddFeedModal bind:open={showAddFeed} />
 </main>
-
-<style>
-  main {
-    width: 100%;
-    height: 100%;
-  }
-</style>

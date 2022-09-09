@@ -1,3 +1,5 @@
+import type { Feed } from "../feeds";
+
 type BridgeMessage = {
   updateApplicationState: {
     update:
@@ -11,10 +13,8 @@ type BridgeMessage = {
 };
 
 type BridgeEvent = {
-  fetchedFeed: {
-    id: string;
-    url: string;
-  };
+  fetchedFeed: Feed;
+  addFeed: never;
 };
 
 class JavaScriptBridge {
