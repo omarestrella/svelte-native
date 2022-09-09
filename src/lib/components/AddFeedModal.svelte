@@ -52,21 +52,26 @@
 {#if open}
   <div
     class="modal modal-bottom sm:modal-middle modal-open"
+    role="dialog"
     use:attachFocus
     in:fade={{ duration: 175 }}
     out:fade={{ duration: 175 }}
   >
     <div class="modal-box grid grid-flow-row gap-2">
       <h3 class="font-bold text-lg">Add New Feed</h3>
-      <div>
-        <input class="input input-primary w-full" />
-      </div>
-      <div class="modal-action">
-        <button class="btn">Add Feed</button>
-        <button class="btn btn-secondary" on:click={() => (open = false)}
-          >Close</button
-        >
-      </div>
+      <form on:submit={(event) => event.preventDefault()}>
+        <div>
+          <input class="input input-primary w-full" type="url" />
+        </div>
+        <div class="modal-action">
+          <button class="btn btn-primary">Add Feed</button>
+          <button
+            class="btn btn-secondary"
+            type="reset"
+            on:click={() => (open = false)}>Close</button
+          >
+        </div>
+      </form>
     </div>
   </div>
 {/if}
