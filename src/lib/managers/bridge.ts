@@ -1,4 +1,4 @@
-import type { Feed } from "../feeds";
+import type { Feed } from "./feed";
 
 type BridgeMessage = {
   updateApplicationState: {
@@ -18,7 +18,7 @@ type BridgeEvent = {
 };
 
 class JavaScriptBridge {
-  nativeMessageHandlers = new Map<
+  private nativeMessageHandlers = new Map<
     keyof BridgeEvent,
     ((data: BridgeEvent[keyof BridgeEvent]) => void)[]
   >();
@@ -33,7 +33,7 @@ class JavaScriptBridge {
     this.nativeMessageHandlers.get(event)?.push(callback);
   }
 
-  emit<EventName extends keyof BridgeEvent>(
+  private emit<EventName extends keyof BridgeEvent>(
     event: EventName,
     data: BridgeEvent[EventName]
   ) {

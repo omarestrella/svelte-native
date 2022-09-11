@@ -45,7 +45,7 @@ class FeedManager: ObservableObject {
   }
   
   func registerListeners() {
-    JavaScriptBridge.instance.on(feedRequest: { (_ feedRequest: FeedRequest) in
+    JavaScriptBridge.instance.on(.fetchFeed) { (_ feedRequest: FeedRequest) in
       guard let feedURL = URL(string: feedRequest.url) else {
         return
       }
@@ -59,7 +59,7 @@ class FeedManager: ObservableObject {
           print("Error parsing RSS feed", error)
         }
       })
-    })
+    }
   }
   
   func handle(feed: Feed) {

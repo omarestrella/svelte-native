@@ -10,13 +10,13 @@ import WebKit
 import Combine
 
 // Client -> Native
-enum JavaScriptBridgeEvent {
+enum ClientEvent: String {
   case updateApplicationState
   case fetchFeed
 }
 
 // Native -> Client
-enum JavaScriptBridgeMessage: Encodable {
+enum HostMessage: Encodable {
   case fetchedFeed(feed: ClientFeed)
   case addFeed
   
@@ -32,39 +32,12 @@ enum JavaScriptBridgeMessage: Encodable {
 
 typealias EventCallback<T> = (_ data: T) -> Void
 
-class ClientEventHandlers {
-  var feedRequestHandlers: [EventCallback<FeedRequest>] = []
-  var applicationUpdateRequestHandlers: [EventCallback<ApplicationUpdateRequest>] = []
-  
-  func on(feedRequest handler: @escaping EventCallback<FeedRequest>) {
-    feedRequestHandlers.append(handler)
-  }
-  
-  func on(applicationUpdateRequest handler: @escaping EventCallback<ApplicationUpdateRequest>) {
-    applicationUpdateRequestHandlers.append(handler)
-  }
-  
-  func emit<T>(_ event: JavaScriptBridgeEvent, data: T) {
-    switch event {
-    case .fetchFeed:
-      guard let data = data as? FeedRequest else { return }
-      feedRequestHandlers.forEach { $0(data) }
-      break
-    case .updateApplicationState:
-      guard let data = data as? ApplicationUpdateRequest else { return }
-      applicationUpdateRequestHandlers.forEach { $0(data) }
-      break
-    }
-  }
-}
-
-
 class JavaScriptBridge: NSObject, WKScriptMessageHandler {
   static var instance = JavaScriptBridge()
 
   var webView: WKWebView?
   
-  private var eventHandlers = ClientEventHandlers()
+  var handlers: [ClientEvent: [(Any) -> Void]] = [:]
 
   func initialize(_ webView: WKWebView) {
     self.webView = webView
@@ -79,9 +52,9 @@ class JavaScriptBridge: NSObject, WKScriptMessageHandler {
       
       switch clientMessage {
       case .updateApplicationState(let update):
-        eventHandlers.emit(.updateApplicationState, data: update)
+        self.handlers[.updateApplicationState]?.forEach { $0(update) }
       case .fetchFeed(let feedRequest):
-        eventHandlers.emit(.fetchFeed, data: feedRequest)
+        self.handlers[.fetchFeed]?.forEach { $0(feedRequest) }
       case .log(let log):
         print("[Client Log] -", log.name, "\n", log.message ?? "")
         break
@@ -94,15 +67,20 @@ class JavaScriptBridge: NSObject, WKScriptMessageHandler {
     }
   }
 
-  func on(feedRequest handler: @escaping EventCallback<FeedRequest>) {
-    eventHandlers.on(feedRequest: handler)
+  
+  func on<T: ClientRequest>(_ event: ClientEvent, handler: @escaping EventCallback<T>) {
+    let wrapper: (Any) -> Void = { data in
+      if let data = data as? T {
+        handler(data)
+      }
+    }
+    if handlers[event] == nil {
+      handlers[event] = []
+    }
+    handlers[event]?.append(wrapper)
   }
   
-  func on(applicationUpdateRequest handler: @escaping EventCallback<ApplicationUpdateRequest>) {
-    eventHandlers.on(applicationUpdateRequest: handler)
-  }
-  
-  func send(_ message: JavaScriptBridgeMessage) {
+  func send(_ message: HostMessage) {
     let (messageName, data) = message.messageData
     guard let encodedData = try? JSONEncoder().encode(data) else {
       print("Could not encode data to send to client")
