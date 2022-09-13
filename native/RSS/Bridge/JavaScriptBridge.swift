@@ -8,6 +8,7 @@
 import Foundation
 import WebKit
 import Combine
+import SwiftUI
 
 // Client -> Native
 enum ClientEvent: String {
@@ -17,8 +18,10 @@ enum ClientEvent: String {
 
 // Native -> Client
 enum HostMessage: Encodable {
-  case fetchedFeed(feed: ClientFeed)
   case addFeed
+  case fetchedFeed(feed: ClientFeed)
+  
+  case colorSchemeChanged(String)
   
   var messageData: (String, Encodable) {
     switch self {
@@ -26,6 +29,8 @@ enum HostMessage: Encodable {
       return ("fetchedFeed", feed)
     case .addFeed:
       return ("addFeed", "")
+    case .colorSchemeChanged(let color):
+      return ("colorSchemeChanged", color)
     }
   }
 }
@@ -33,15 +38,26 @@ enum HostMessage: Encodable {
 typealias EventCallback<T> = (_ data: T) -> Void
 
 class JavaScriptBridge: NSObject, WKScriptMessageHandler {
-  static var instance = JavaScriptBridge()
+  static var `default` = JavaScriptBridge()
 
   var webView: WKWebView?
   
   var handlers: [ClientEvent: [(Any) -> Void]] = [:]
 
-  func initialize(_ webView: WKWebView) {
+  func initialize(_ webView: WKWebView, _ colorScheme: ColorScheme) {
     self.webView = webView
     webView.configuration.userContentController.add(self, name: "mobile")
+    
+    guard let themeJS = Bundle.main.path(forResource: "theme", ofType: "js") else { return }
+    guard let themeString = try? String(contentsOfFile: themeJS) else { return }
+    let themeScript = WKUserScript(source: themeString, injectionTime: .atDocumentStart, forMainFrameOnly: false)
+    webView.configuration.userContentController.addUserScript(themeScript)
+    
+    if colorScheme == .light {
+      webView.evaluateJavaScript("setLightTheme()")
+    } else {
+      webView.evaluateJavaScript("setDarkTheme()")
+    }
   }
 
   func userContentController(_: WKUserContentController, didReceive message: WKScriptMessage) {

@@ -10,24 +10,30 @@ import SwiftUI
 import WebKit
 
 struct WebView {
-  var url: String
+  @Environment(\.colorScheme) var colorScheme
+  @Environment(\.openURL) var openURL
+
+  var url: URL
+
   private let webView = WKWebView()
 
-  init(url: String) {
+  init(url: URL) {
     self.url = url
   }
 
   public func makeCoordinator() -> Coordinator {
-    Coordinator(webView)
+    Coordinator(webView, self)
   }
 
   class Coordinator: NSObject, WKNavigationDelegate {
     private var webView: WKWebView
+    private var hostView: WebView
 
-    init(_ webView: WKWebView) {
+    init(_ webView: WKWebView, _ hostView: WebView) {
       self.webView = webView
+      self.hostView = hostView
 
-      JavaScriptBridge.instance.initialize(webView)
+      JavaScriptBridge.default.initialize(webView, hostView.colorScheme)
     }
 
     // MARK: Internal API
@@ -46,11 +52,18 @@ struct WebView {
 
     public func webView(_: WKWebView, didFinish _: WKNavigation!) {}
 
-    public func webView(_: WKWebView, didStartProvisionalNavigation _: WKNavigation!) {
-    }
+    public func webView(_: WKWebView, didStartProvisionalNavigation _: WKNavigation!) {}
 
-    public func webView(_: WKWebView, decidePolicyFor _: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
-      decisionHandler(.allow)
+    public func webView(_: WKWebView, decidePolicyFor navigation: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
+      switch navigation.navigationType {
+      case .linkActivated:
+        decisionHandler(.cancel)
+        if let url = navigation.request.url {
+          hostView.openURL(url)
+        }
+      default:
+        decisionHandler(.allow)
+      }
     }
   }
 }
@@ -59,14 +72,22 @@ struct WebView {
 extension WebView: NSViewRepresentable {
   typealias NSViewType = WKWebView
 
-  func updateNSView(_: WKWebView, context _: NSViewRepresentableContext<WebView>) {}
+  func updateNSView(_: WKWebView, context _: NSViewRepresentableContext<WebView>) {
+    let scheme = colorScheme == .light ? "light" : "dark"
+    JavaScriptBridge.default.send(.colorSchemeChanged(scheme))
+  }
 
   func makeNSView(context: NSViewRepresentableContext<WebView>) -> WKWebView {
     webView.navigationDelegate = context.coordinator
     webView.uiDelegate = context.coordinator as? WKUIDelegate
-    if let url = URL(string: url) {
+
+    if url.isFileURL {
+      print(url.deletingLastPathComponent())
+      webView.loadFileURL(url, allowingReadAccessTo: url.deletingLastPathComponent())
+    } else {
       webView.load(URLRequest(url: url))
     }
+
     return webView
   }
 }
@@ -77,7 +98,12 @@ extension WebView: UIViewRepresentable {
   func makeUIView(context _: Context) -> WKWebView {
     webView.navigationDelegate = context.coordinator
     webView.uiDelegate = context.coordinator as? WKUIDelegate
-    webView.load(URLRequest(url: viewModel.url))
+    if url.isFileURL {
+      webView.loadFileURL(url, allowingReadAccessTo: url.deletingLastPathComponent())
+    } else {
+      webView.load(URLRequest(url: url))
+    }
+
     return webView
   }
 

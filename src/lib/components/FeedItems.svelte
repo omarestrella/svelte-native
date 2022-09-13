@@ -13,8 +13,8 @@
       <button
         class="
           feed-item text-left grid grid-rows-1 gap-1 p-2 border-b border-base-300
-          outline-1 outline-primary
-          {isActive && 'bg-secondary text-neutral'}
+          {isActive && 'btn-primary hover:bg-primary hover:border-base-300'}
+          !outline-1 !outline-primary-focus
         "
         on:click={() => feedManager.currentFeedItem.set(feedItem)}
       >
@@ -27,6 +27,6 @@
 
 <style>
   .feed-item {
-    outline-offset: -3px;
+    outline-offset: -2px;
   }
 </style>

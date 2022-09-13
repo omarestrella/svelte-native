@@ -8,6 +8,8 @@
   import { feedManager, type Feed } from "./lib/managers/feed";
   import { javascriptBridge } from "./lib/managers/bridge";
   import FeedItemContent from "./lib/components/FeedItemContent.svelte";
+  import { setDarkTheme, setLightTheme } from "./utils/theme";
+  import FeedItemDetail from "./lib/components/FeedItemDetail.svelte";
 
   let showAddFeed = false;
 
@@ -16,6 +18,14 @@
   onMount(() => {
     javascriptBridge.on("addFeed", () => {
       showAddFeed = true;
+    });
+
+    javascriptBridge.on("colorSchemeChanged", (color: "light" | "dark") => {
+      if (color === "light") {
+        setLightTheme();
+      } else {
+        setDarkTheme();
+      }
     });
 
     feedManager.fetchFeed("https://feeds.arstechnica.com/arstechnica/index");
@@ -28,13 +38,13 @@
       <FeedItems feed={$currentFeed} />
     </div>
 
-    <div
-      class="flex flex-1 flex-col items-center w-auto h-full overflow-auto px-8"
-    >
-      {#if $currentFeedItem}
-        <FeedItemContent item={$currentFeedItem} />
-      {/if}
-    </div>
+    {#if $currentFeedItem}
+      <div
+        class="flex flex-1 flex-col items-center w-auto h-full overflow-auto px-8"
+      >
+        <FeedItemDetail item={$currentFeedItem} />
+      </div>
+    {/if}
   </div>
 
   <AddFeedModal bind:open={showAddFeed} />

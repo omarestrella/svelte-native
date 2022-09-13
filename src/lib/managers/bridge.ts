@@ -15,6 +15,7 @@ type BridgeMessage = {
 type BridgeEvent = {
   fetchedFeed: Feed;
   addFeed: never;
+  colorSchemeChanged: "light" | "dark";
 };
 
 class JavaScriptBridge {

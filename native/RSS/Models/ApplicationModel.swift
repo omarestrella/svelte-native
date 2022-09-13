@@ -17,7 +17,7 @@ class ApplicationModel: ObservableObject {
   }
 
   func registerEventHandlers() {
-    JavaScriptBridge.instance.on(.updateApplicationState) { (_ update: ApplicationUpdateRequest) in
+    JavaScriptBridge.default.on(.updateApplicationState) { (_ update: ApplicationUpdateRequest) in
       switch update.update {
       case .subtitle(let subtitle):
         self.subtitle = subtitle

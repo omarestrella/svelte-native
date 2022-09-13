@@ -45,7 +45,7 @@ class FeedManager: ObservableObject {
   }
   
   func registerListeners() {
-    JavaScriptBridge.instance.on(.fetchFeed) { (_ feedRequest: FeedRequest) in
+    JavaScriptBridge.default.on(.fetchFeed) { (_ feedRequest: FeedRequest) in
       guard let feedURL = URL(string: feedRequest.url) else {
         return
       }
@@ -66,7 +66,7 @@ class FeedManager: ObservableObject {
     if let rssFeed = feed.rssFeed {
       guard let clientFeed = ClientFeed.from(feed: rssFeed) else { return }
       DispatchQueue.main.async {
-        JavaScriptBridge.instance.send(.fetchedFeed(feed: clientFeed))
+        JavaScriptBridge.default.send(.fetchedFeed(feed: clientFeed))
       }
     }
   }
